@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/TON-USERNAME/k8s-secure-infra
+    repoURL: https://github.com/hasnakoussan/k8s-secure-infra
     targetRevision: main
     path: gitops/manifests/demo-app
   destination:
