@@ -1,0 +1,50 @@
+name: CI — Validate & Sync
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar xz && sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate manifests
+        run: |
+          kubeconform -strict -summary \
+            gitops/manifests/**/*.yaml
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Lint Helm charts
+        run: |
+          for chart in helm/charts/*/; do
+            helm lint "$chart"
+          done
+        continue-on-error: true
+
+  security-scan:
+    name: Scan images with Trivy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy on manifests
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: gitops/
+          severity: HIGH,CRITICAL
