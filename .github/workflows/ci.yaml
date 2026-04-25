@@ -23,8 +23,7 @@ jobs:
 
       - name: Validate manifests
         run: |
-          find gitops/manifests -type f -name "*.yaml" \
-            | xargs kubeconform -strict -summary
+          find gitops/manifests -name "*.yaml" -type f | xargs kubeconform -strict -summary
 
       - name: Install Helm
         uses: azure/setup-helm@v3
