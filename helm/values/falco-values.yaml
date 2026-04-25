@@ -1,0 +1,52 @@
+driver:
+  kind: modern_ebpf
+
+falco:
+  json_output: true
+  log_stderr: true
+  log_level: info
+
+falcosidekick:
+  enabled: false
+
+# Le plugin container est géré ici automatiquement
+collectors:
+  enabled: true
+  containerEngine:
+    enabled: true
+    pluginRef: "ghcr.io/falcosecurity/plugins/plugin/container:0.6.4"
+    labelMaxLen: 100
+    withSize: false
+    hooks: ["create"]
+    engines:
+      docker:
+        enabled: true
+        sockets: ["/var/run/docker.sock"]
+      containerd:
+        enabled: true
+        sockets: ["/run/host-containerd/containerd.sock"]
+      podman:
+        enabled: false
+
+falcoctl:
+  config:
+    artifact:
+      allowedTypes:
+        - rulesfile
+        - plugin
+      install:
+        refs:
+          - "falco-rules:5"
+          - "ghcr.io/falcosecurity/plugins/plugin/container:0"
+      follow:
+        refs:
+          - "falco-rules:5"
+          - "ghcr.io/falcosecurity/plugins/plugin/container:0"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
