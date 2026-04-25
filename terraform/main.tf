@@ -112,3 +112,20 @@ resource "helm_release" "ingress_nginx" {
 
   depends_on = [kind_cluster.main]
 }
+
+resource "helm_release" "falco" {
+  name             = "falco"
+  repository       = "https://falcosecurity.github.io/charts"
+  chart            = "falco"
+  version          = "8.0.2"
+  namespace        = "falco"
+  create_namespace = true
+  wait             = false
+  timeout          = 600
+
+  values = [
+    file("${path.module}/../helm/values/falco-values.yaml")
+  ]
+
+  depends_on = [kind_cluster.main]
+}
